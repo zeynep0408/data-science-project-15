@@ -1,0 +1,6 @@
+pytest
+requests
+watchdog
+numpy
+pandas
+matplotlib
