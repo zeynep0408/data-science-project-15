@@ -14,6 +14,7 @@ sample_size: örneklem büyüklüğü (int)
 Output: Seçilen örneklem listesi.
 """
 def simple_random_sampling(data: list, sample_size: int) -> list:
+    return random.sample(data, sample_size)
     pass
 
 
@@ -28,6 +29,13 @@ step: adım sayısı (int)
 Output: Seçilen örneklem listesi.
 """
 def systematic_sampling(data: list, step: int) -> list:
+    baslangic = random.randint(0, step - 1)
+    sonuc = []
+    i = baslangic
+    while i < len(data):
+        sonuc.append(data[i])
+        i = i + step
+    return sonuc
     pass
 
 
@@ -47,7 +55,17 @@ Input:
 Output: Örneklem listesi.
 """
 def stratified_sampling(data: list, strata_key: callable, sample_size_per_stratum: int) -> list:
-    pass
+      gruplar = defaultdict(list)
+      for eleman in data:
+        grup_adi = strata_key(eleman)
+        gruplar[grup_adi].append(eleman)
+
+      sonuc = []
+      for grup_adi, elemanlar in gruplar.items():
+        secilen = random.sample(elemanlar, min(sample_size_per_stratum, len(elemanlar)))
+        sonuc.extend(secilen)
+      return sonuc
+      pass
 
 
 """
@@ -65,7 +83,11 @@ Input:
 Output: Seçilen tüm elemanları içeren liste.
 """
 def cluster_sampling(clusters: dict, cluster_ids: list) -> list:
-   pass
+     sonuc = []
+     for kumeleme_id in cluster_ids:
+        sonuc.extend(clusters[kumeleme_id])
+     return sonuc
+     pass
 
 """
 Açıklama: data listesinden, kolay erişilebilir ilk max_samples elemanı seçer.
@@ -78,6 +100,8 @@ Input:
 Output: Örneklem listesi.
 """
 def convenience_sampling(data: list, max_samples: int) -> list:
+    return data[:max_samples]
+
     pass
 
 
@@ -90,7 +114,13 @@ Input:
 Output: Seçilen elemanların listesi.
 """
 def judgmental_sampling(data: list, judge_func: callable) -> list:
-    pass
+     sonuc = []
+     for eleman in data:
+        if judge_func(eleman):
+            sonuc.append(eleman)
+     return sonuc
+
+     pass
 
 
 """
@@ -109,7 +139,15 @@ Input:
 Output: Örneklem listesi.
 """
 def quota_sampling(data: list, strata_key: callable, quotas: dict) -> list:
-    pass
+      sayaclar = {grup: 0 for grup in quotas}
+      sonuc = []
+      for eleman in data:
+        grup = strata_key(eleman)
+        if grup in quotas and sayaclar[grup] < quotas[grup]:
+            sonuc.append(eleman)
+            sayaclar[grup] = sayaclar[grup] + 1
+      return sonuc
+      pass
 
 
 """
@@ -125,4 +163,20 @@ Output: Seçilen örneklem listesi.
 
 """
 def snowball_sampling(data: list, seed_ids: list, get_neighbors: callable, max_samples: int) -> list:
-    pass
+        ziyaret_edilenler = set()
+        kuyruk = deque(seed_ids)
+        sonuc = []
+
+        while kuyruk and len(sonuc) < max_samples:
+         kisi = kuyruk.popleft()
+        if kisi not in ziyaret_edilenler and kisi in data:
+            ziyaret_edilenler.add(kisi)
+            sonuc.append(kisi)
+            # Bu kişinin komşularını kuyruğa ekle
+            komsular = get_neighbors(kisi)
+            for komsu in komsular:
+                if komsu not in ziyaret_edilenler:
+                    kuyruk.append(komsu)
+
+            return sonuc
+            pass
